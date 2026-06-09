@@ -1,0 +1,8 @@
+{
+  "title": "Head of AI & Data Transformation",
+  "company": "Regional Insurance Group (APAC)",
+  "location": "Bangkok, Thailand / APAC",
+  "url": "https://example.com/head-of-ai",
+  "source": "sample",
+  "description": "We are seeking a Head of AI & Data Transformation to lead enterprise-wide AI adoption across insurance operations in Southeast Asia. The role combines strategic leadership with hands-on delivery ownership.\n\nKey Responsibilities:\n- Define and execute the AI transformation roadmap across claims, underwriting, fraud, and customer experience\n- Build and lead an AI Centre of Excellence; establish MLOps governance and model risk frameworks\n- Own delivery of ML models in production (claims triage, fraud detection, pricing)\n- Drive cloud migration and modernisation of legacy insurance platforms\n- Present AI program outcomes to C-suite and Board; manage regulatory alignment with local regulators\n- Lead cross-functional teams of engineers, data scientists, and business stakeholders\n\nRequirements:\n- 12+ years in technology leadership; 5+ years in AI/ML delivery in production\n- Deep insurance domain knowledge: claims, underwriting, fraud, pricing\n- Hands-on ML experience: XGBoost, LightGBM, neural networks, cloud ML platforms (AWS SageMaker or Azure ML)\n- Experience with real-time data platforms (Kafka, Spark) and modern data stack (Databricks, Snowflake, dbt)\n- Track record of enterprise cloud migrations at scale\n- Board-level communication and stakeholder management experience\n- APAC / Southeast Asia experience strongly preferred\n- TOGAF or equivalent enterprise architecture certification a plus\n- Agentic AI and LLM orchestration experience a strong differentiator"
+}
