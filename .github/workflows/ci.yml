@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+jobs:
+  validate:
+    name: Validate
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Syntax check — all modules
+        run: |
+          python -m py_compile main.py
+          python -m py_compile agent/scorer.py
+          python -m py_compile agent/cover_letter.py
+          python -m py_compile agent/optimizer.py
+          python -m py_compile agent/interview_prep.py
+          python -m py_compile agent/models.py
+          python -m py_compile db/models.py
+          python -m py_compile db/session.py
+          python -m py_compile scrapers/wwr.py
+          python -m py_compile scrapers/remotive.py
+          python -m py_compile scrapers/indeed.py
+          python -m py_compile tracker/commands.py
+
+      - name: CLI loads and help renders
+        env:
+          ANTHROPIC_API_KEY: dummy
+          USER_EMAIL: ci@example.com
+          USER_NAME: CI
+        run: python main.py --help
+
+      - name: Smoke test — sample job scoring
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          USER_EMAIL: ci@example.com
+          USER_NAME: CI
+        if: ${{ secrets.ANTHROPIC_API_KEY != '' }}
+        run: python main.py sample

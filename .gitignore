@@ -1,10 +1,55 @@
+# Environment
 .env
+.env.local
+.env.*.local
+
+# Database
 *.db
+*.sqlite
+*.sqlite3
+
+# Python
 __pycache__/
 *.pyc
 *.pyo
+*.pyd
+*.pyw
+*.pyz
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+var/
+sdist/
+develop-eggs/
+.installed.cfg
+lib/
+lib64/
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Generated output (personal, not source)
 covers/
 prep/
 optimizations/
-.venv/
-venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
