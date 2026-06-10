@@ -7,12 +7,14 @@ Base = declarative_base()
 
 
 class User(Base):
-    """One row per human user. Phase 1: a single default row (id=1)."""
+    """One row per human user. Phase 1: a single default row (id=1). Phase 2: clerk_id-keyed."""
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    email = Column(String(255), unique=True, index=True, nullable=False)
+    clerk_id = Column(String(255), unique=True, nullable=True, index=True)
+    email = Column(String(255), unique=True, index=True, nullable=True)
     name = Column(String(255))
+    resume = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
