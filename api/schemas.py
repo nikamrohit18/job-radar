@@ -42,6 +42,7 @@ class FetchIn(BaseModel):
     query: str = "software engineer python"
     location: str = "remote"
     days: int = 3
+    limit: int = 20
 
 
 class FetchOut(BaseModel):

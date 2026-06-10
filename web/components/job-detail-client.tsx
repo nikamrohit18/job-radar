@@ -125,7 +125,7 @@ export function JobDetailClient({ job, token: initialToken }: { job: JobOut; tok
               {[
                 { value: `${s.ats_score}`, label: 'ATS Score / 100', color: scoreColor(s.ats_score) },
                 { value: `${s.interview_probability}%`, label: 'Interview Probability', color: 'text-indigo-400' },
-                { value: `$${s.salary_min.toLocaleString()}–${s.salary_max.toLocaleString()}`, label: 'Est. Salary (USD)', color: 'text-gray-300' },
+                { value: `$${s.salary_min.toLocaleString('en-US')}–${s.salary_max.toLocaleString('en-US')}`, label: 'Est. Salary (USD)', color: 'text-gray-300' },
               ].map(({ value, label, color }) => (
                 <div key={label} className="bg-gray-900 border border-gray-800 rounded-lg p-4 text-center">
                   <p className={`text-2xl font-bold ${color}`}>{value}</p>

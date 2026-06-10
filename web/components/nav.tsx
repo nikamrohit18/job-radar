@@ -30,6 +30,7 @@ export function Nav() {
           <>
             {navLink('/dashboard', 'Jobs')}
             {navLink('/pipeline', 'Pipeline')}
+            {navLink('/profile', 'Profile')}
           </>
         )}
         <div className="ml-auto">

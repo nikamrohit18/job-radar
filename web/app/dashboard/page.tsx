@@ -2,7 +2,7 @@ import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { api } from '@/lib/api'
-import { FetchJobsButton } from '@/components/fetch-jobs-button'
+import { SearchForm } from '@/components/search-form'
 import type { JobOut } from '@/lib/api'
 
 function scoreColor(score: number) {
@@ -56,9 +56,11 @@ export default async function DashboardPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-3">
         <h1 className="text-xl font-semibold">Scored Jobs</h1>
-        <FetchJobsButton />
+      </div>
+      <div className="mb-6">
+        <SearchForm />
       </div>
 
       {jobs.length === 0 ? (

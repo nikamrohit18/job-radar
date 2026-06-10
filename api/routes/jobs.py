@@ -95,9 +95,9 @@ def fetch_jobs(
     if source == "indeed":
         raw_jobs = indeed.fetch_jobs(body.query, body.location, body.days)
     elif source == "remotive":
-        raw_jobs = remotive.fetch_jobs(query=body.query)
+        raw_jobs = remotive.fetch_jobs(query=body.query, limit=body.limit)
     elif source == "wwr":
-        raw_jobs = wwr.fetch_jobs(query=body.query)
+        raw_jobs = wwr.fetch_jobs(query=body.query, limit=body.limit)
     else:
         raise HTTPException(
             status_code=400,
