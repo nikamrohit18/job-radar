@@ -42,6 +42,18 @@ def _job_to_out(job: orm.Job, score: orm.JobScore | None = None) -> JobOut:
     )
 
 
+def _to_pydantic_job(job: orm.Job) -> PydanticJob:
+    """agent.models.Job requires str fields; ORM location/url are nullable (manual jobs especially)."""
+    return PydanticJob(
+        title=job.title,
+        company=job.company,
+        location=job.location or "",
+        description=job.description,
+        url=job.url or "",
+        source=job.source or "",
+    )
+
+
 def _resolve_resume(user: orm.User) -> str:
     if user.resume:
         return user.resume
@@ -121,14 +133,7 @@ def fetch_jobs(
 
     scored_jobs: list[JobOut] = []
     for db_job in new_db_jobs:
-        pydantic_job = PydanticJob(
-            title=db_job.title,
-            company=db_job.company,
-            location=db_job.location,
-            description=db_job.description,
-            url=db_job.url,
-            source=db_job.source,
-        )
+        pydantic_job = _to_pydantic_job(db_job)
         try:
             result = score_job(pydantic_job, resume)
             s = result.score
@@ -183,14 +188,7 @@ def create_manual_job(
     db.add(db_job)
     db.commit()
 
-    pydantic_job = PydanticJob(
-        title=db_job.title,
-        company=db_job.company,
-        location=db_job.location or "",
-        description=db_job.description,
-        url=db_job.url or "",
-        source=db_job.source,
-    )
+    pydantic_job = _to_pydantic_job(db_job)
     try:
         result = score_job(pydantic_job, resume)
     except Exception:

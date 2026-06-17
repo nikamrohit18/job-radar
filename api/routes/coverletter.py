@@ -5,9 +5,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from agent import cover_letter as cl_agent
-from agent.models import Job as PydanticJob
 from api.deps import get_current_user, get_db
-from api.routes.jobs import _resolve_resume
+from api.routes.jobs import _resolve_resume, _to_pydantic_job
 from api.schemas import CoverLetterIn, CoverLetterOut
 from db import models as orm
 
@@ -67,10 +66,7 @@ def generate_cover_letter(
         )
 
     resume = _resolve_resume(user)
-    pydantic_job = PydanticJob(
-        title=job.title, company=job.company, location=job.location,
-        description=job.description, url=job.url, source=job.source,
-    )
+    pydantic_job = _to_pydantic_job(job)
     content = cl_agent.generate(pydantic_job, resume, tone=body.tone)
 
     if existing:

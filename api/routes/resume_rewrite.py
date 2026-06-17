@@ -4,9 +4,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from agent import resume_rewrite as rewrite_agent
-from agent.models import Job as PydanticJob
 from api.deps import get_current_user, get_db
-from api.routes.jobs import _resolve_resume
+from api.routes.jobs import _resolve_resume, _to_pydantic_job
 from api.schemas import ResumeRewriteIn, ResumeRewriteOut
 from db import models as orm
 
@@ -65,10 +64,7 @@ def generate_tailored_resume(
     gaps = score.gaps if score else None
     missing_keywords = score.missing_keywords if score else None
 
-    pydantic_job = PydanticJob(
-        title=job.title, company=job.company, location=job.location,
-        description=job.description, url=job.url, source=job.source,
-    )
+    pydantic_job = _to_pydantic_job(job)
     content = rewrite_agent.generate(pydantic_job, resume, gaps=gaps, missing_keywords=missing_keywords)
 
     if existing:

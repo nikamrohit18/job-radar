@@ -4,9 +4,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from agent import interview_prep as prep_agent
-from agent.models import Job as PydanticJob
 from api.deps import get_current_user, get_db
-from api.routes.jobs import _resolve_resume
+from api.routes.jobs import _resolve_resume, _to_pydantic_job
 from api.schemas import PrepGapQuestionOut, PrepIn, PrepOut, PrepQuestionOut
 from db import models as orm
 
@@ -71,10 +70,7 @@ def generate_prep(
     score = db.query(orm.JobScore).filter_by(job_id=job_id, user_id=user.id).first()
     gaps = score.gaps if score else None
 
-    pydantic_job = PydanticJob(
-        title=job.title, company=job.company, location=job.location,
-        description=job.description, url=job.url, source=job.source,
-    )
+    pydantic_job = _to_pydantic_job(job)
     result = prep_agent.generate(pydantic_job, resume, gaps=gaps)
 
     if existing:
