@@ -104,14 +104,16 @@ export function JobDetailClient({ job, token: initialToken }: { job: JobOut; tok
           <div>
             <h1 className="text-2xl font-bold text-white">{job.title}</h1>
             <p className="text-gray-400 mt-1">{job.company} · {job.location ?? 'Remote'}</p>
-            <a
-              href={job.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-indigo-400 hover:text-indigo-300 mt-1 inline-block"
-            >
-              View listing →
-            </a>
+            {job.url && (
+              <a
+                href={job.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-indigo-400 hover:text-indigo-300 mt-1 inline-block"
+              >
+                View listing →
+              </a>
+            )}
           </div>
           <button
             onClick={handleApply}

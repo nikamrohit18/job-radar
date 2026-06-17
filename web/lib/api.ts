@@ -18,7 +18,7 @@ export type JobOut = {
   title: string
   company: string
   location: string | null
-  url: string
+  url: string | null
   source: string | null
   date_posted: string | null
   created_at: string

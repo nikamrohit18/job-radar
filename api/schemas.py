@@ -29,7 +29,7 @@ class JobOut(BaseModel):
     title: str
     company: str
     location: Optional[str] = None
-    url: str
+    url: Optional[str] = None
     source: Optional[str] = None
     date_posted: Optional[datetime] = None
     created_at: datetime
