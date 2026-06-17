@@ -64,20 +64,22 @@ def _to_pydantic_job(job: orm.Job) -> PydanticJob:
     )
 
 
-def _resolve_resume(user: orm.User) -> str:
-    """Each user's own saved resume is the only source -- no shared fallback file.
+def _resolve_resume(user: orm.User, db: Session) -> str:
+    """Each user's active ResumeVersion is the only source -- no shared
+    fallback file.
 
-    (A previous version fell back to the server-local data/resume.md when a user
-    had none on file. That file is Rohit's personal resume; falling back to it
-    would leak his resume to any other signed-up user who hasn't uploaded their
-    own yet. The CLI entry point in main.py still reads data/resume.md directly
-    and is unaffected -- it's single-user by design.)
+    (A previous version fell back to the server-local data/resume.md when a
+    user had none on file. That file is Rohit's personal resume; falling back
+    to it would leak his resume to any other signed-up user who hasn't saved
+    their own yet. The CLI entry point in main.py still reads data/resume.md
+    directly and is unaffected -- it's single-user by design.)
     """
-    if user.resume:
-        return user.resume
+    active = db.query(orm.ResumeVersion).filter_by(user_id=user.id, is_active=True).first()
+    if active:
+        return active.content
     raise HTTPException(
         status_code=400,
-        detail="No resume on file. Upload via PUT /users/me/resume",
+        detail="No resume on file. Save one via POST /users/me/resumes",
     )
 
 
@@ -169,7 +171,7 @@ def fetch_jobs(
     db: Session = Depends(get_db),
     user: orm.User = Depends(get_current_user),
 ):
-    resume = _resolve_resume(user)
+    resume = _resolve_resume(user, db)
 
     source = body.source
     if source == "indeed":
@@ -248,7 +250,7 @@ def create_manual_job(
     auto-fetched -- reuse that job/score instead of inserting a duplicate row
     (which would otherwise crash with a database integrity error).
     """
-    resume = _resolve_resume(user)
+    resume = _resolve_resume(user, db)
 
     db_job = db.query(orm.Job).filter_by(url=body.url).first() if body.url else None
     if db_job is None:

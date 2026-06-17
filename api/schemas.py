@@ -195,8 +195,6 @@ class UserOut(BaseModel):
     clerk_id: Optional[str] = None
     email: Optional[str] = None
     name: Optional[str] = None
-    has_resume: bool
-    resume: Optional[str] = None
     created_at: datetime
 
     model_config = {"from_attributes": True}
@@ -207,5 +205,20 @@ class UserUpdateIn(BaseModel):
     name: Optional[str] = None
 
 
-class ResumeIn(BaseModel):
+# ---------------------------------------------------------------------------
+# Resume versions
+# ---------------------------------------------------------------------------
+
+class ResumeVersionIn(BaseModel):
     content: str
+    label: Optional[str] = None
+
+
+class ResumeVersionOut(BaseModel):
+    id: int
+    content: str
+    label: Optional[str] = None
+    is_active: bool
+    created_at: datetime
+
+    model_config = {"from_attributes": True}

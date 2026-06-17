@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 load_dotenv()  # must run before importing agent modules (Anthropic client reads API key on init)
 
-from api.routes import applications, coverletter, jobs, optimize, prep, resume_rewrite, users
+from api.routes import applications, coverletter, jobs, optimize, prep, resume_rewrite, resumes, users
 from db.session import init_db
 
 app = FastAPI(
@@ -42,6 +42,7 @@ app.include_router(prep.router,         prefix="/jobs",         tags=["interview
 app.include_router(resume_rewrite.router, prefix="/jobs",       tags=["resume-rewrite"])
 app.include_router(optimize.router,     prefix="/optimize",     tags=["optimize"])
 app.include_router(users.router,        prefix="/users",        tags=["users"])
+app.include_router(resumes.router,      prefix="/users/me/resumes", tags=["resumes"])
 
 
 @app.get("/health", tags=["meta"])

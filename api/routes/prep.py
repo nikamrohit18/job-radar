@@ -66,7 +66,7 @@ def generate_prep(
     if existing and not body.regen:
         return _prep_to_out(job_id, existing, cached=True)
 
-    resume = _resolve_resume(user)
+    resume = _resolve_resume(user, db)
     score = db.query(orm.JobScore).filter_by(job_id=job_id, user_id=user.id).first()
     gaps = score.gaps if score else None
 

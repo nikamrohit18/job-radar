@@ -8,15 +8,16 @@ export default async function ProfilePage() {
   if (!userId) redirect('/sign-in')
 
   const token = (await getToken()) ?? ''
-  const user = await api.users.me(token)
+  const resumes = await api.users.listResumes(token)
 
   return (
     <div className="max-w-2xl">
       <h1 className="text-xl font-semibold mb-2">Profile</h1>
       <p className="text-gray-400 text-sm mb-8">
-        Paste your resume below. Claude uses it to score jobs, generate cover letters, and tailor interview prep.
+        Claude uses your active resume to score jobs, generate cover letters, and tailor interview prep.
+        Every version you save is kept, so you can switch back to an older one at any time.
       </p>
-      <ResumeForm token={token} resume={user.resume} />
+      <ResumeForm token={token} resumes={resumes} />
     </div>
   )
 }

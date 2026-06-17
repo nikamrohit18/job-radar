@@ -59,7 +59,7 @@ def generate_tailored_resume(
             generated_at=existing.generated_at, cached=True,
         )
 
-    resume = _resolve_resume(user)
+    resume = _resolve_resume(user, db)
     score = db.query(orm.JobScore).filter_by(job_id=job_id, user_id=user.id).first()
     gaps = score.gaps if score else None
     missing_keywords = score.missing_keywords if score else None

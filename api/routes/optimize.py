@@ -36,7 +36,7 @@ def run_optimizer(
         if s.resume_tweaks:
             all_tweaks.extend(s.resume_tweaks)
 
-    resume = _resolve_resume(user)
+    resume = _resolve_resume(user, db)
     result = optimizer.analyze(resume, all_tweaks, job_count)
 
     return OptimizeOut(

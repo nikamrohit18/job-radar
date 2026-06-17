@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from typing import Generator
 
 from sqlalchemy import create_engine, inspect, text
@@ -27,6 +28,7 @@ def init_db() -> None:
     Base.metadata.create_all(bind=engine)
     _ensure_missing_keywords_column()
     _ensure_job_score_archive_columns()
+    _migrate_resume_versions()
 
 
 def _ensure_missing_keywords_column() -> None:
@@ -52,6 +54,45 @@ def _ensure_job_score_archive_columns() -> None:
             conn.execute(text("ALTER TABLE job_scores ADD COLUMN is_deleted BOOLEAN DEFAULT FALSE"))
         if "deleted_at" not in columns:
             conn.execute(text("ALTER TABLE job_scores ADD COLUMN deleted_at TIMESTAMP"))
+
+
+def _migrate_resume_versions() -> None:
+    """One-time, idempotent: users.resume (single text field) predates the
+    resume_versions table. Backfill each user's existing resume as their first
+    active version, then drop the old column -- after this runs once, the old
+    column is gone, so re-running is a no-op (it returns as soon as the column
+    is missing)."""
+    inspector = inspect(engine)
+    if "users" not in inspector.get_table_names():
+        return
+    columns = {c["name"] for c in inspector.get_columns("users")}
+    if "resume" not in columns:
+        return
+    with engine.begin() as conn:
+        rows = conn.execute(
+            text("SELECT id, resume FROM users WHERE resume IS NOT NULL AND resume != ''")
+        ).fetchall()
+        for user_id, resume_content in rows:
+            already_migrated = conn.execute(
+                text("SELECT COUNT(*) FROM resume_versions WHERE user_id = :uid"),
+                {"uid": user_id},
+            ).scalar()
+            if already_migrated:
+                continue
+            conn.execute(
+                text(
+                    "INSERT INTO resume_versions (user_id, content, label, is_active, created_at) "
+                    "VALUES (:user_id, :content, :label, :is_active, :created_at)"
+                ),
+                {
+                    "user_id": user_id,
+                    "content": resume_content,
+                    "label": "Migrated resume",
+                    "is_active": True,
+                    "created_at": datetime.utcnow(),
+                },
+            )
+        conn.execute(text("ALTER TABLE users DROP COLUMN resume"))
 
 
 def get_db() -> Generator:

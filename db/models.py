@@ -14,7 +14,21 @@ class User(Base):
     clerk_id = Column(String(255), unique=True, nullable=True, index=True)
     email = Column(String(255), unique=True, index=True, nullable=True)
     name = Column(String(255))
-    resume = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class ResumeVersion(Base):
+    """A saved resume snapshot. A user can have many; exactly one is_active at
+    a time -- that's the one _resolve_resume() feeds into scoring/cover-letter/
+    prep/rewrite. Saving a new version or activating an old one flips the flag,
+    nothing is ever overwritten or deleted, so past versions stay browsable."""
+    __tablename__ = "resume_versions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    content = Column(Text, nullable=False)
+    label = Column(String(255), nullable=True)
+    is_active = Column(Boolean, default=False, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
 

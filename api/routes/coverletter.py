@@ -65,7 +65,7 @@ def generate_cover_letter(
             cached=True,
         )
 
-    resume = _resolve_resume(user)
+    resume = _resolve_resume(user, db)
     pydantic_job = _to_pydantic_job(job)
     content = cl_agent.generate(pydantic_job, resume, tone=body.tone)
 

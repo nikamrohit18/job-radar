@@ -89,8 +89,14 @@ export type UserOut = {
   clerk_id: string | null
   email: string | null
   name: string | null
-  has_resume: boolean
-  resume: string | null
+  created_at: string
+}
+
+export type ResumeVersionOut = {
+  id: number
+  content: string
+  label: string | null
+  is_active: boolean
   created_at: string
 }
 
@@ -183,9 +189,15 @@ export const api = {
   },
   users: {
     me: (token: string) => apiFetch<UserOut>('/users/me', token),
-    updateResume: (token: string, content: string) =>
-      apiFetch<UserOut>('/users/me/resume', token, {
-        method: 'PUT', body: JSON.stringify({ content }),
+    listResumes: (token: string) =>
+      apiFetch<ResumeVersionOut[]>('/users/me/resumes', token),
+    saveResume: (token: string, body: { content: string; label?: string }) =>
+      apiFetch<ResumeVersionOut>('/users/me/resumes', token, {
+        method: 'POST', body: JSON.stringify(body),
+      }),
+    activateResume: (token: string, id: number) =>
+      apiFetch<ResumeVersionOut>(`/users/me/resumes/${id}/activate`, token, {
+        method: 'PUT',
       }),
   },
 }
