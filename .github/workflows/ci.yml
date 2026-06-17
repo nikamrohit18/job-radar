@@ -62,7 +62,12 @@ jobs:
           DATABASE_URL: "sqlite:///./ci_test.db"
           CLERK_JWKS_URL: "https://example.com/.well-known/jwks.json"
         run: |
-          python -c "from api.main import app; assert any(r.path == '/jobs/manual' for r in app.routes); print('FastAPI app OK —', len(app.routes), 'routes registered')"
+          python -c "
+          from api.main import app
+          paths = app.openapi()['paths']
+          assert '/jobs/manual' in paths, list(paths.keys())
+          print('FastAPI app OK --', len(paths), 'paths registered')
+          "
 
       - name: CLI loads and help renders
         env:
