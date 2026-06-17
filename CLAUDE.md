@@ -5,7 +5,7 @@ AI-powered job search agent that scores, ranks, and tracks job listings against 
 ## Project Goals
 
 - **Phase 1 (Personal):** CLI/agent that auto-fetches jobs, scores them against a resume using Claude, generates tailored cover letters, and tracks application status. (Complete.)
-- **Phase 2 (SaaS):** Multi-user Next.js web app with Clerk auth and per-user job pipelines. (Built — FastAPI + Next.js + Clerk; not yet deployed.)
+- **Phase 2 (SaaS):** Multi-user Next.js web app with Clerk auth and per-user job pipelines. (Built — FastAPI + Next.js + Clerk. Backend is deployed on Railway; frontend is still local-dev only, pointed at the deployed backend.)
 
 ## Core Concept
 
@@ -22,7 +22,7 @@ Inspired by a "think like a recruiter" prompt approach:
 - **Backend/Agent:** Python — CLI (`main.py`) and FastAPI (`api/`)
 - **Frontend (Phase 2):** Next.js App Router (`web/`), Clerk auth
 - **Database:** SQLite locally, PostgreSQL-ready via `DATABASE_URL` (target: Neon)
-- **Deployment (planned):** FastAPI → Railway, frontend → Vercel
+- **Deployment:** FastAPI is live on Railway (auto-deploys from GitHub on every push to `master`; build+deploy takes a minute or two — if a just-pushed backend change "isn't working," check the Railway deploy actually finished before assuming a code bug). Frontend → Vercel (planned, not yet deployed). Local dev frontend (`web/.env.local`'s `NEXT_PUBLIC_API_URL`) points at the deployed Railway backend, not a local one — there's no local FastAPI instance unless you start one yourself.
 - **Job Sources:** We Work Remotely (RSS), Remotive (API), Indeed (via Apify). LinkedIn is never scraped — see Key Decisions.
 
 ## Project Structure
