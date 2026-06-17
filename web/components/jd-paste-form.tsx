@@ -3,10 +3,12 @@ import { useState } from 'react'
 import { useAuth } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { api } from '@/lib/api'
+import { useToast } from '@/components/toast'
 
 export function JdPasteForm({ token: initialToken }: { token: string }) {
   const { getToken } = useAuth()
   const router = useRouter()
+  const toast = useToast()
 
   const [title, setTitle] = useState('')
   const [company, setCompany] = useState('')
@@ -14,14 +16,12 @@ export function JdPasteForm({ token: initialToken }: { token: string }) {
   const [url, setUrl] = useState('')
   const [jdText, setJdText] = useState('')
   const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
   const canSubmit = title.trim() && company.trim() && jdText.trim() && !submitting
 
   async function handleSubmit() {
     if (!canSubmit) return
     setSubmitting(true)
-    setError(null)
     try {
       const token = (await getToken()) ?? initialToken
       const job = await api.jobs.createManual(token, {
@@ -33,7 +33,7 @@ export function JdPasteForm({ token: initialToken }: { token: string }) {
       })
       router.push(`/jobs/${job.id}`)
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Failed to analyze job description')
+      toast.error(e instanceof Error ? e.message : 'Failed to analyze job description')
       setSubmitting(false)
     }
   }
@@ -89,8 +89,6 @@ export function JdPasteForm({ token: initialToken }: { token: string }) {
           className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-3 text-sm text-gray-300 placeholder-gray-600 focus:outline-none focus:border-gray-600 resize-y font-mono leading-relaxed"
         />
       </div>
-
-      {error && <p className="text-red-400 text-sm">{error}</p>}
 
       <div className="flex items-center justify-between">
         <p className="text-xs text-gray-600">

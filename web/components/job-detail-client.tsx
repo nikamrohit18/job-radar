@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useAuth } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { api } from '@/lib/api'
+import { useToast } from '@/components/toast'
 import type { JobOut, CoverLetterOut, PrepOut, ResumeRewriteOut } from '@/lib/api'
 
 type Tab = 'score' | 'coverletter' | 'prep' | 'resume'
@@ -16,6 +17,7 @@ function scoreColor(n: number) {
 export function JobDetailClient({ job, token: initialToken }: { job: JobOut; token: string }) {
   const { getToken } = useAuth()
   const router = useRouter()
+  const toast = useToast()
   const [tab, setTab] = useState<Tab>('score')
   const [applying, setApplying] = useState(false)
   const [applied, setApplied] = useState(false)
@@ -23,7 +25,6 @@ export function JobDetailClient({ job, token: initialToken }: { job: JobOut; tok
   const [prep, setPrep] = useState<PrepOut | null>(null)
   const [tailoredResume, setTailoredResume] = useState<ResumeRewriteOut | null>(null)
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
   async function tok() {
     return (await getToken()) ?? initialToken
@@ -31,13 +32,13 @@ export function JobDetailClient({ job, token: initialToken }: { job: JobOut; tok
 
   async function handleApply() {
     setApplying(true)
-    setError(null)
     try {
       await api.applications.apply(await tok(), job.id, {})
       setApplied(true)
+      toast.success('Marked as applied.')
       router.refresh()
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Failed to apply')
+      toast.error(e instanceof Error ? e.message : 'Failed to apply')
     } finally {
       setApplying(false)
     }
@@ -45,12 +46,11 @@ export function JobDetailClient({ job, token: initialToken }: { job: JobOut; tok
 
   async function loadCoverLetter(regen = false) {
     setLoading(true)
-    setError(null)
     try {
       const cl = await api.coverLetter.generate(await tok(), job.id, { tone: 'professional', regen })
       setCoverLetter(cl)
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Failed to generate')
+      toast.error(e instanceof Error ? e.message : 'Failed to generate')
     } finally {
       setLoading(false)
     }
@@ -58,12 +58,11 @@ export function JobDetailClient({ job, token: initialToken }: { job: JobOut; tok
 
   async function loadPrep(regen = false) {
     setLoading(true)
-    setError(null)
     try {
       const p = await api.prep.generate(await tok(), job.id, regen)
       setPrep(p)
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Failed to generate')
+      toast.error(e instanceof Error ? e.message : 'Failed to generate')
     } finally {
       setLoading(false)
     }
@@ -71,12 +70,11 @@ export function JobDetailClient({ job, token: initialToken }: { job: JobOut; tok
 
   async function loadTailoredResume(regen = false) {
     setLoading(true)
-    setError(null)
     try {
       const r = await api.resumeRewrite.generate(await tok(), job.id, regen)
       setTailoredResume(r)
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Failed to generate')
+      toast.error(e instanceof Error ? e.message : 'Failed to generate')
     } finally {
       setLoading(false)
     }
@@ -123,7 +121,6 @@ export function JobDetailClient({ job, token: initialToken }: { job: JobOut; tok
             {applied ? 'Applied ✓' : applying ? 'Saving…' : 'Mark as Applied'}
           </button>
         </div>
-        {error && <p className="text-red-400 text-sm mt-3">{error}</p>}
       </div>
 
       {/* Tabs */}
@@ -191,7 +188,6 @@ export function JobDetailClient({ job, token: initialToken }: { job: JobOut; tok
             >
               {loading ? 'Generating…' : 'Generate Cover Letter'}
             </button>
-            {error && <p className="text-red-400 text-sm mt-3">{error}</p>}
           </div>
         ) : (
           <div>
@@ -228,7 +224,6 @@ export function JobDetailClient({ job, token: initialToken }: { job: JobOut; tok
             >
               {loading ? 'Generating…' : 'Generate Prep Guide'}
             </button>
-            {error && <p className="text-red-400 text-sm mt-3">{error}</p>}
           </div>
         ) : (
           <div className="space-y-6">
@@ -309,7 +304,6 @@ export function JobDetailClient({ job, token: initialToken }: { job: JobOut; tok
             >
               {loading ? 'Generating…' : 'Generate Tailored Resume'}
             </button>
-            {error && <p className="text-red-400 text-sm mt-3">{error}</p>}
           </div>
         ) : (
           <div>

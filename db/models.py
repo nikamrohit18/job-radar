@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, JSON, String, Text
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, JSON, String, Text
 from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
@@ -50,6 +50,10 @@ class JobScore(Base):
     resume_tweaks = Column(JSON)
     summary = Column(Text)
     scored_at = Column(DateTime, default=datetime.utcnow)
+    # Soft delete only -- never hard-delete a scored job, future billing needs the
+    # generation count intact even for jobs the user has archived from their dashboard.
+    is_deleted = Column(Boolean, default=False, nullable=False)
+    deleted_at = Column(DateTime, nullable=True)
 
 
 class Application(Base):

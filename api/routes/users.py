@@ -19,6 +19,7 @@ def get_me(
         email=user.email,
         name=user.name,
         has_resume=bool(user.resume),
+        resume=user.resume,
         created_at=user.created_at,
     )
 
@@ -41,6 +42,7 @@ def update_me(
         email=user.email,
         name=user.name,
         has_resume=bool(user.resume),
+        resume=user.resume,
         created_at=user.created_at,
     )
 
@@ -60,5 +62,6 @@ def update_resume(
         email=user.email,
         name=user.name,
         has_resume=True,
+        resume=user.resume,
         created_at=user.created_at,
     )

@@ -20,6 +20,8 @@ class ScoreOut(BaseModel):
     resume_tweaks: list[str]
     summary: str
     scored_at: datetime
+    is_deleted: bool = False
+    deleted_at: Optional[datetime] = None
 
     model_config = {"from_attributes": True}
 
@@ -194,6 +196,7 @@ class UserOut(BaseModel):
     email: Optional[str] = None
     name: Optional[str] = None
     has_resume: bool
+    resume: Optional[str] = None
     created_at: datetime
 
     model_config = {"from_attributes": True}

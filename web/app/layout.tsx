@@ -3,6 +3,7 @@ import { Geist } from 'next/font/google'
 import { ClerkProvider } from '@clerk/nextjs'
 import './globals.css'
 import { Nav } from '@/components/nav'
+import { ToastProvider } from '@/components/toast'
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-geist' })
 
@@ -16,8 +17,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <ClerkProvider>
       <html lang="en" className={geist.variable}>
         <body className="min-h-screen bg-gray-900 text-gray-100 font-sans">
-          <Nav />
-          <main className="max-w-5xl mx-auto px-4 py-8">{children}</main>
+          <ToastProvider>
+            <Nav />
+            <main className="max-w-5xl mx-auto px-4 py-8">{children}</main>
+          </ToastProvider>
         </body>
       </html>
     </ClerkProvider>

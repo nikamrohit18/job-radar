@@ -10,7 +10,17 @@ Your task: analyze a job posting against a candidate's resume and give an honest
 Be realistic — not overly optimistic. Provide USD salary estimates."""
 
 
-def score_prompt(job: Job, resume: str) -> str:
+def resume_block(resume: str) -> str:
+    """The resume, as its own block so it can be prompt-cached across multiple
+    score_job() calls in the same fetch run (same user, many jobs, one resume)."""
+    return f"""## Candidate Resume
+
+{resume}"""
+
+
+def job_prompt(job: Job) -> str:
+    """Per-job instructions -- everything that changes from one score_job() call
+    to the next. Kept separate from resume_block() so the resume can be cached."""
     return f"""Score this job opportunity for the candidate based on their resume.
 
 ## Job Posting
@@ -19,12 +29,6 @@ def score_prompt(job: Job, resume: str) -> str:
 **Location:** {job.location}
 
 {job.description}
-
----
-
-## Candidate Resume
-
-{resume}
 
 ---
 

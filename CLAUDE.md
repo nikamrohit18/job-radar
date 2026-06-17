@@ -18,7 +18,7 @@ Inspired by a "think like a recruiter" prompt approach:
 
 ## Tech Stack
 
-- **AI:** Claude API (`claude-sonnet-4-6`) via Anthropic SDK
+- **AI:** Claude API (`claude-sonnet-4-6`) via Anthropic SDK, with prompt caching on the resume block during batch scoring runs
 - **Backend/Agent:** Python — CLI (`main.py`) and FastAPI (`api/`)
 - **Frontend (Phase 2):** Next.js App Router (`web/`), Clerk auth
 - **Database:** SQLite locally, PostgreSQL-ready via `DATABASE_URL` (target: Neon)
@@ -45,6 +45,8 @@ job-radar/
 - Claude does the analysis; scraping/fetching is separate from AI logic so each can be swapped independently.
 - Application tracking is built in from day one, not bolted on later.
 - **LinkedIn is never scraped, full stop** — zero tolerance for unofficial APIs or any technique that risks account suspension. The supported path for LinkedIn (or any job site) is the manual JD-paste flow (`/jobs/new` in the web app): paste the job description and it's scored and tracked exactly like a fetched job — ATS keyword gaps included, with an option to generate a resume tailored to that job.
+- **Never hard-delete user-generated data** — "deleting" a scored job from the dashboard flags it (`JobScore.is_deleted`/`deleted_at`) instead of removing the row. Phase 2 will meter SaaS billing on generation counts (scores, cover letters, tailored resumes, interview preps); a real delete would let a paid user regenerate for free indefinitely.
+- **One resume per user, no fallback files** — `User.resume` (saved via the Profile page) is the only source the API uses for scoring/cover-letter/prep/rewrite. There is no shared `data/resume.md` fallback in that path (a previous version had one, and it leaked the owner's personal resume to any other signed-up user with none on file). `data/resume.md` is read directly only by the Phase 1 CLI (`main.py`), which is single-user by design.
 
 ## Owner
 

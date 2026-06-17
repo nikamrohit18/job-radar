@@ -11,6 +11,8 @@ export type ScoreOut = {
   resume_tweaks: string[]
   summary: string
   scored_at: string
+  is_deleted: boolean
+  deleted_at: string | null
 }
 
 export type JobOut = {
@@ -88,7 +90,19 @@ export type UserOut = {
   email: string | null
   name: string | null
   has_resume: boolean
+  resume: string | null
   created_at: string
+}
+
+export type JobListParams = {
+  limit?: number
+  archived?: boolean
+  location?: string
+  company?: string
+  source?: string
+  minScore?: number
+  sortBy?: 'ats_score' | 'interview_probability' | 'scored_at' | 'date_posted'
+  sortDir?: 'asc' | 'desc'
 }
 
 async function apiFetch<T>(path: string, token: string, options: RequestInit = {}): Promise<T> {
@@ -110,14 +124,28 @@ async function apiFetch<T>(path: string, token: string, options: RequestInit = {
 
 export const api = {
   jobs: {
-    list: (token: string, limit = 30) =>
-      apiFetch<JobOut[]>(`/jobs?limit=${limit}`, token),
+    list: (token: string, params: JobListParams = {}) => {
+      const qs = new URLSearchParams()
+      qs.set('limit', String(params.limit ?? 30))
+      if (params.archived) qs.set('archived', 'true')
+      if (params.location) qs.set('location', params.location)
+      if (params.company) qs.set('company', params.company)
+      if (params.source) qs.set('source', params.source)
+      if (params.minScore !== undefined) qs.set('min_score', String(params.minScore))
+      if (params.sortBy) qs.set('sort_by', params.sortBy)
+      if (params.sortDir) qs.set('sort_dir', params.sortDir)
+      return apiFetch<JobOut[]>(`/jobs?${qs.toString()}`, token)
+    },
     get: (token: string, id: number) =>
       apiFetch<JobOut>(`/jobs/${id}`, token),
     fetch: (token: string, body: { source: string; query: string; location: string; days: number; limit: number }) =>
       apiFetch<FetchOut>('/jobs/fetch', token, { method: 'POST', body: JSON.stringify(body) }),
     createManual: (token: string, body: { jd_text: string; title: string; company: string; location?: string; url?: string }) =>
       apiFetch<JobOut>('/jobs/manual', token, { method: 'POST', body: JSON.stringify(body) }),
+    archive: (token: string, id: number) =>
+      apiFetch<JobOut>(`/jobs/${id}`, token, { method: 'DELETE' }),
+    restore: (token: string, id: number) =>
+      apiFetch<JobOut>(`/jobs/${id}/restore`, token, { method: 'POST' }),
   },
   applications: {
     pipeline: (token: string) =>

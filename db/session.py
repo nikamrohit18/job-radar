@@ -26,6 +26,7 @@ def init_db() -> None:
     """Create all tables if they don't exist. Safe to call on every startup."""
     Base.metadata.create_all(bind=engine)
     _ensure_missing_keywords_column()
+    _ensure_job_score_archive_columns()
 
 
 def _ensure_missing_keywords_column() -> None:
@@ -38,6 +39,19 @@ def _ensure_missing_keywords_column() -> None:
         return
     with engine.begin() as conn:
         conn.execute(text("ALTER TABLE job_scores ADD COLUMN missing_keywords JSON"))
+
+
+def _ensure_job_score_archive_columns() -> None:
+    """job_scores predates is_deleted/deleted_at (soft-delete) -- add them if missing."""
+    inspector = inspect(engine)
+    if "job_scores" not in inspector.get_table_names():
+        return
+    columns = {c["name"] for c in inspector.get_columns("job_scores")}
+    with engine.begin() as conn:
+        if "is_deleted" not in columns:
+            conn.execute(text("ALTER TABLE job_scores ADD COLUMN is_deleted BOOLEAN DEFAULT FALSE"))
+        if "deleted_at" not in columns:
+            conn.execute(text("ALTER TABLE job_scores ADD COLUMN deleted_at TIMESTAMP"))
 
 
 def get_db() -> Generator:

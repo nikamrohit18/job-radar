@@ -16,7 +16,7 @@ export default async function ProfilePage() {
       <p className="text-gray-400 text-sm mb-8">
         Paste your resume below. Claude uses it to score jobs, generate cover letters, and tailor interview prep.
       </p>
-      <ResumeForm token={token} hasResume={user.has_resume} />
+      <ResumeForm token={token} resume={user.resume} />
     </div>
   )
 }
