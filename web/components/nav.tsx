@@ -29,6 +29,7 @@ export function Nav() {
         {isSignedIn && (
           <>
             {navLink('/dashboard', 'Jobs')}
+            {navLink('/jobs/new', 'Paste JD')}
             {navLink('/pipeline', 'Pipeline')}
             {navLink('/profile', 'Profile')}
           </>

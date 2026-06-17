@@ -20,11 +20,15 @@ function daysAgo(dateStr: string) {
   return `${days} days ago`
 }
 
+function isStale(dateStr: string, thresholdDays: number) {
+  const days = Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000)
+  return days >= thresholdDays
+}
+
 function AppRow({ app }: { app: ApplicationOut }) {
   const job = app.job
   if (!job) return null
-  const staleDays = Math.floor((Date.now() - new Date(app.updated_at).getTime()) / 86400000)
-  const needsFollowUp = app.status === 'applied' && staleDays >= 7
+  const needsFollowUp = app.status === 'applied' && isStale(app.updated_at, 7)
 
   return (
     <div className="flex items-center justify-between py-2.5 px-4 hover:bg-gray-800/50 transition-colors">
@@ -60,7 +64,7 @@ export default async function PipelinePage() {
       {total === 0 ? (
         <div className="text-center py-20 text-gray-500">
           <p className="mb-2">No applications tracked yet.</p>
-          <p className="text-sm">Open a job and click "Mark as Applied" to start tracking.</p>
+          <p className="text-sm">Open a job and click &quot;Mark as Applied&quot; to start tracking.</p>
         </div>
       ) : (
         <div className="space-y-6">

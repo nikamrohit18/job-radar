@@ -33,6 +33,7 @@ Analyze the fit and provide:
 - `interview_probability` (0-100): realistic % chance of getting an interview, given competition
 - `salary_min` / `salary_max`: realistic USD salary range for this role at the candidate's level
 - `strengths`: the candidate's genuine advantages for THIS specific role (be specific)
-- `gaps`: missing skills or experience that meaningfully reduce their chances
+- `gaps`: missing skills or experience that meaningfully reduce their chances (substance, not phrasing)
+- `missing_keywords`: exact terms or phrases from the job posting (tools, certifications, methodologies, titles) that an ATS would scan for and that are missing or underrepresented in the resume, even if the candidate has the underlying experience
 - `resume_tweaks`: specific keyword or phrasing changes to improve ATS score for this job
 - `summary`: 2-3 sentences of honest overall assessment"""

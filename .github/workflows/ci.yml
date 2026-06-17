@@ -7,8 +7,8 @@ on:
     branches: [master, main]
 
 jobs:
-  validate:
-    name: Validate
+  validate-python:
+    name: Validate (CLI + API)
     runs-on: ubuntu-latest
     env:
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -25,20 +25,44 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Syntax check — all modules
+      - name: Syntax check — CLI and agent modules
         run: |
           python -m py_compile main.py
+          python -m py_compile agent/models.py
+          python -m py_compile agent/prompts.py
           python -m py_compile agent/scorer.py
           python -m py_compile agent/cover_letter.py
+          python -m py_compile agent/resume_rewrite.py
           python -m py_compile agent/optimizer.py
           python -m py_compile agent/interview_prep.py
-          python -m py_compile agent/models.py
           python -m py_compile db/models.py
           python -m py_compile db/session.py
           python -m py_compile scrapers/wwr.py
           python -m py_compile scrapers/remotive.py
           python -m py_compile scrapers/indeed.py
           python -m py_compile tracker/commands.py
+
+      - name: Syntax check — FastAPI layer
+        run: |
+          python -m py_compile api/main.py
+          python -m py_compile api/auth.py
+          python -m py_compile api/deps.py
+          python -m py_compile api/schemas.py
+          python -m py_compile api/routes/jobs.py
+          python -m py_compile api/routes/applications.py
+          python -m py_compile api/routes/coverletter.py
+          python -m py_compile api/routes/prep.py
+          python -m py_compile api/routes/resume_rewrite.py
+          python -m py_compile api/routes/optimize.py
+          python -m py_compile api/routes/users.py
+
+      - name: FastAPI app loads and routes register
+        env:
+          ANTHROPIC_API_KEY: dummy
+          DATABASE_URL: "sqlite:///./ci_test.db"
+          CLERK_JWKS_URL: "https://example.com/.well-known/jwks.json"
+        run: |
+          python -c "from api.main import app; assert any(r.path == '/jobs/manual' for r in app.routes); print('FastAPI app OK —', len(app.routes), 'routes registered')"
 
       - name: CLI loads and help renders
         env:
@@ -53,3 +77,29 @@ jobs:
           USER_NAME: CI
         if: env.ANTHROPIC_API_KEY != ''
         run: python main.py sample
+
+  validate-web:
+    name: Validate (Web)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check + build
+        run: npm run build

@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from agent.models import Job as PydanticJob
 from agent.scorer import score_job
 from api.deps import get_current_user, get_db
-from api.schemas import FetchIn, FetchOut, JobOut, ScoreOut
+from api.schemas import FetchIn, FetchOut, JobOut, ManualJobIn, ScoreOut
 from db import models as orm
 from scrapers import indeed, remotive, wwr
 
@@ -21,6 +21,7 @@ def _score_to_out(s: orm.JobScore) -> ScoreOut:
         salary_max=s.salary_max,
         strengths=s.strengths or [],
         gaps=s.gaps or [],
+        missing_keywords=s.missing_keywords or [],
         resume_tweaks=s.resume_tweaks or [],
         summary=s.summary or "",
         scored_at=s.scored_at,
@@ -160,3 +161,56 @@ def fetch_jobs(
         skipped=skipped,
         jobs=scored_jobs,
     )
+
+
+@router.post("/manual", response_model=JobOut)
+def create_manual_job(
+    body: ManualJobIn,
+    db: Session = Depends(get_db),
+    user: orm.User = Depends(get_current_user),
+):
+    """Create a job from pasted JD text (e.g. copied from LinkedIn) and score it immediately."""
+    resume = _resolve_resume(user)
+
+    db_job = orm.Job(
+        title=body.title,
+        company=body.company,
+        location=body.location or None,
+        description=body.jd_text,
+        url=body.url or None,
+        source="manual",
+    )
+    db.add(db_job)
+    db.commit()
+
+    pydantic_job = PydanticJob(
+        title=db_job.title,
+        company=db_job.company,
+        location=db_job.location or "",
+        description=db_job.description,
+        url=db_job.url or "",
+        source=db_job.source,
+    )
+    try:
+        result = score_job(pydantic_job, resume)
+    except Exception:
+        return _job_to_out(db_job, None)
+
+    s = result.score
+    db_score = orm.JobScore(
+        job_id=db_job.id,
+        user_id=user.id,
+        ats_score=s.ats_score,
+        interview_probability=s.interview_probability,
+        salary_min=s.salary_min,
+        salary_max=s.salary_max,
+        strengths=s.strengths,
+        gaps=s.gaps,
+        missing_keywords=s.missing_keywords,
+        resume_tweaks=s.resume_tweaks,
+        summary=s.summary,
+    )
+    db.add(db_score)
+    db.commit()
+
+    return _job_to_out(db_job, db_score)

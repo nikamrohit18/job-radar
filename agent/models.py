@@ -17,6 +17,7 @@ class ScoreResult(BaseModel):
     salary_max: int              # USD
     strengths: list[str]
     gaps: list[str]
+    missing_keywords: list[str]  # exact ATS terms/phrases from the JD missing or underrepresented in the resume
     resume_tweaks: list[str]
     summary: str                 # 2–3 sentence assessment
 

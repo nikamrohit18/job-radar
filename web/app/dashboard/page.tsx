@@ -59,14 +59,19 @@ export default async function DashboardPage() {
       <div className="flex items-center justify-between mb-3">
         <h1 className="text-xl font-semibold">Scored Jobs</h1>
       </div>
-      <div className="mb-6">
+      <div className="mb-2">
         <SearchForm />
+      </div>
+      <div className="mb-6 text-right">
+        <Link href="/jobs/new" className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">
+          or paste a job description manually →
+        </Link>
       </div>
 
       {jobs.length === 0 ? (
         <div className="text-center py-20 text-gray-500">
           <p className="mb-2">No scored jobs yet.</p>
-          <p className="text-sm">Click "Fetch Jobs" to pull listings and score them against your resume.</p>
+          <p className="text-sm">Click &quot;Fetch Jobs&quot; to pull listings and score them against your resume.</p>
         </div>
       ) : (
         <div className="space-y-3">

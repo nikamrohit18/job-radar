@@ -3,9 +3,9 @@ import { useState } from 'react'
 import { useAuth } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { api } from '@/lib/api'
-import type { JobOut, CoverLetterOut, PrepOut } from '@/lib/api'
+import type { JobOut, CoverLetterOut, PrepOut, ResumeRewriteOut } from '@/lib/api'
 
-type Tab = 'score' | 'coverletter' | 'prep'
+type Tab = 'score' | 'coverletter' | 'prep' | 'resume'
 
 function scoreColor(n: number) {
   if (n >= 70) return 'text-green-400'
@@ -21,6 +21,7 @@ export function JobDetailClient({ job, token: initialToken }: { job: JobOut; tok
   const [applied, setApplied] = useState(false)
   const [coverLetter, setCoverLetter] = useState<CoverLetterOut | null>(null)
   const [prep, setPrep] = useState<PrepOut | null>(null)
+  const [tailoredResume, setTailoredResume] = useState<ResumeRewriteOut | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -61,6 +62,19 @@ export function JobDetailClient({ job, token: initialToken }: { job: JobOut; tok
     try {
       const p = await api.prep.generate(await tok(), job.id, regen)
       setPrep(p)
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Failed to generate')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function loadTailoredResume(regen = false) {
+    setLoading(true)
+    setError(null)
+    try {
+      const r = await api.resumeRewrite.generate(await tok(), job.id, regen)
+      setTailoredResume(r)
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Failed to generate')
     } finally {
@@ -115,6 +129,7 @@ export function JobDetailClient({ job, token: initialToken }: { job: JobOut; tok
         {tabBtn('score', 'Score')}
         {tabBtn('coverletter', 'Cover Letter')}
         {tabBtn('prep', 'Interview Prep')}
+        {tabBtn('resume', 'Tailored Resume')}
       </div>
 
       {/* Score tab */}
@@ -136,10 +151,11 @@ export function JobDetailClient({ job, token: initialToken }: { job: JobOut; tok
 
             <p className="text-gray-300 text-sm leading-relaxed">{s.summary}</p>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {[
                 { title: 'Strengths', items: s.strengths, color: 'text-green-400', marker: '+' },
                 { title: 'Gaps', items: s.gaps, color: 'text-red-400', marker: '–' },
+                { title: 'Missing Keywords', items: s.missing_keywords, color: 'text-orange-400', marker: '#' },
                 { title: 'Resume Tweaks', items: s.resume_tweaks, color: 'text-yellow-400', marker: '*' },
               ].map(({ title, items, color, marker }) => (
                 <div key={title}>
@@ -266,13 +282,52 @@ export function JobDetailClient({ job, token: initialToken }: { job: JobOut; tok
                   {prep.gap_questions.map((q, i) => (
                     <div key={i} className="bg-gray-900 border border-yellow-900/30 rounded-lg p-4">
                       <p className="text-xs text-yellow-500 mb-1">Gap: {q.gap}</p>
-                      <p className="text-sm font-medium text-white mb-2">"{q.question}"</p>
+                      <p className="text-sm font-medium text-white mb-2">&quot;{q.question}&quot;</p>
                       <p className="text-sm text-gray-400">{q.talking_point}</p>
                     </div>
                   ))}
                 </div>
               </div>
             )}
+          </div>
+        )
+      )}
+
+      {/* Tailored Resume tab */}
+      {tab === 'resume' && (
+        !tailoredResume ? (
+          <div className="text-center py-16">
+            <p className="text-gray-400 mb-4 text-sm">
+              Rewrite your resume to fit this role, targeting its gaps and missing ATS keywords.
+            </p>
+            <button
+              onClick={() => loadTailoredResume()}
+              disabled={loading}
+              className="px-6 py-3 bg-indigo-600 rounded-lg text-sm font-medium hover:bg-indigo-500 disabled:opacity-50 transition-colors"
+            >
+              {loading ? 'Generating…' : 'Generate Tailored Resume'}
+            </button>
+            {error && <p className="text-red-400 text-sm mt-3">{error}</p>}
+          </div>
+        ) : (
+          <div>
+            <div className="flex justify-between items-center mb-4">
+              <span className="text-xs text-gray-500">
+                {tailoredResume.cached ? 'Cached' : 'Freshly generated'}
+              </span>
+              <button
+                onClick={() => loadTailoredResume(true)}
+                disabled={loading}
+                className="text-xs text-indigo-400 hover:text-indigo-300 disabled:opacity-50"
+              >
+                {loading ? 'Regenerating…' : 'Regenerate'}
+              </button>
+            </div>
+            <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
+              <pre className="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed font-sans">
+                {tailoredResume.content}
+              </pre>
+            </div>
           </div>
         )
       )}

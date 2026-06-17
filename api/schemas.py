@@ -16,6 +16,7 @@ class ScoreOut(BaseModel):
     salary_max: int
     strengths: list[str]
     gaps: list[str]
+    missing_keywords: list[str]
     resume_tweaks: list[str]
     summary: str
     scored_at: datetime
@@ -50,6 +51,14 @@ class FetchOut(BaseModel):
     new: int
     skipped: int
     jobs: list[JobOut]
+
+
+class ManualJobIn(BaseModel):
+    jd_text: str
+    title: str
+    company: str
+    location: str = ""
+    url: str = ""
 
 
 # ---------------------------------------------------------------------------
@@ -139,6 +148,23 @@ class PrepOut(BaseModel):
     gap_questions: list[PrepGapQuestionOut]
     generated_at: datetime
     cached: bool = False
+
+
+# ---------------------------------------------------------------------------
+# Tailored Resume Rewrite
+# ---------------------------------------------------------------------------
+
+class ResumeRewriteIn(BaseModel):
+    regen: bool = False
+
+
+class ResumeRewriteOut(BaseModel):
+    id: int
+    content: str
+    generated_at: datetime
+    cached: bool = False
+
+    model_config = {"from_attributes": True}
 
 
 # ---------------------------------------------------------------------------

@@ -46,6 +46,7 @@ class JobScore(Base):
     salary_max = Column(Integer)
     strengths = Column(JSON)
     gaps = Column(JSON)
+    missing_keywords = Column(JSON)
     resume_tweaks = Column(JSON)
     summary = Column(Text)
     scored_at = Column(DateTime, default=datetime.utcnow)
@@ -86,4 +87,15 @@ class InterviewPrep(Base):
     job_id = Column(Integer, ForeignKey("jobs.id"), nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     content = Column(Text, nullable=False)  # JSON-serialized PrepResult
+    generated_at = Column(DateTime, default=datetime.utcnow)
+
+
+class TailoredResume(Base):
+    """AI-rewritten resume tailored to one job — one per (user, job) pair."""
+    __tablename__ = "tailored_resumes"
+
+    id = Column(Integer, primary_key=True, index=True)
+    job_id = Column(Integer, ForeignKey("jobs.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    content = Column(Text, nullable=False)  # Markdown
     generated_at = Column(DateTime, default=datetime.utcnow)

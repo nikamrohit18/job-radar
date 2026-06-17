@@ -1,7 +1,7 @@
 import os
 from typing import Generator
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.orm import sessionmaker
 
 from .models import Base, User
@@ -22,6 +22,19 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 def init_db() -> None:
     """Create all tables if they don't exist. Safe to call on every startup."""
     Base.metadata.create_all(bind=engine)
+    _ensure_missing_keywords_column()
+
+
+def _ensure_missing_keywords_column() -> None:
+    """job_scores predates the missing_keywords column -- add it if an older DB lacks it."""
+    inspector = inspect(engine)
+    if "job_scores" not in inspector.get_table_names():
+        return
+    columns = {c["name"] for c in inspector.get_columns("job_scores")}
+    if "missing_keywords" in columns:
+        return
+    with engine.begin() as conn:
+        conn.execute(text("ALTER TABLE job_scores ADD COLUMN missing_keywords JSON"))
 
 
 def get_db() -> Generator:
